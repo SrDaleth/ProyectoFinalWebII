@@ -1,4 +1,5 @@
 const Disfraz = require('../models/Disfraz');
+const Alquiler = require('../models/Alquiler');
 
 exports.obtenerDisfraces = async (req, res) => {
   try {
