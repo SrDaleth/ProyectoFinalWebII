@@ -1,4 +1,4 @@
-const API_URL = 'https://mystikaboutique.onrender.com';
+const API_URL = 'https://mystikaboutique.onrender.com/api';
 
 document.addEventListener('DOMContentLoaded', () => {
   cargarDisfraces();
