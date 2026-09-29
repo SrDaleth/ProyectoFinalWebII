@@ -97,6 +97,33 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
+// 1. Abrir modal para eliminar un único disfraz
+function abrirModalEliminar(id) {
+  document.getElementById('eliminar-disfraz-id').value = id;
+  openModal('modal-eliminar-disfraz');
+}
+
+// 2. Event listener para procesar la eliminación con PIN
+document.getElementById('form-eliminar-disfraz').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = document.getElementById('eliminar-disfraz-id').value;
+  const pin = document.getElementById('eliminar-pin').value;
+
+  const res = await fetch(`${API_URL}/disfraces/${id}`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pin })
+  });
+
+  if (res.ok) {
+    closeModal('modal-eliminar-disfraz');
+    cargarDisfraces();
+  } else {
+    const data = await res.json();
+    alert(`Error: ${data.error}`);
+  }
+});
+
 //funcion para cargar Disfraces
 async function cargarDisfraces() {
   const res = await fetch(`${API_URL}/disfraces`);
