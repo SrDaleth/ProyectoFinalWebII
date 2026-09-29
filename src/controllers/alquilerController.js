@@ -46,3 +46,36 @@ exports.obtenerAlquileres = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+//Funcion para devolver disfraz y actualizar stock
+
+exports.marcarDevuelto = async (req, res) => {
+  try {
+    const { pin } = req.body;
+    if (pin !== process.env.SECURITY_PIN) {
+      return res.status(401).json({ error: 'PIN de seguridad incorrecto' });
+    }
+
+    const alquiler = await Alquiler.findById(req.params.id);
+    if (!alquiler) return res.status(404).json({ error: 'Alquiler no encontrado' });
+
+    if (alquiler.estado === 'DEVUELTO') {
+      return res.status(400).json({ error: 'Este disfraz ya figuraba como devuelto' });
+    }
+
+    // Cambiar estado
+    alquiler.estado = 'DEVUELTO';
+    await alquiler.save();
+
+    // Sumar 1 al stock disponible del disfraz
+    const disfraz = await Disfraz.findById(alquiler.disfrazId);
+    if (disfraz) {
+      disfraz.stockDisponible += 1;
+      await disfraz.save();
+    }
+
+    res.json({ mensaje: 'Disfraz devuelto y stock actualizado', alquiler });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};

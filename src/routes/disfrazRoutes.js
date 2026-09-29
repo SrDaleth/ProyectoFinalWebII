@@ -1,4 +1,4 @@
-const express = require('express');
+/*const express = require('express');
 const router = express.Router();
 const { obtenerDisfraces, crearDisfraz, eliminarDisfraz } = require('../controllers/disfrazController');
 const { uploadSingle, processImage } = require('../middlewares/uploadMiddleware');
@@ -6,5 +6,18 @@ const { uploadSingle, processImage } = require('../middlewares/uploadMiddleware'
 router.get('/', obtenerDisfraces);
 router.post('/', uploadSingle, processImage, crearDisfraz);
 router.delete('/:id', eliminarDisfraz);
+
+module.exports = router;*/
+
+const express = require('express');
+const router = express.Router();
+const { obtenerDisfraces, crearDisfraz, eliminarDisfraz, vaciarInventarioCompleto, actualizarPrecio } = require('../controllers/disfrazController');
+const { uploadSingle, processImage } = require('../middlewares/uploadMiddleware');
+
+router.get('/', obtenerDisfraces);
+router.post('/', uploadSingle, processImage, crearDisfraz);
+router.delete('/vaciar/todo', vaciarInventarioCompleto);
+router.delete('/:id', eliminarDisfraz);
+router.put('/:id/precio', actualizarPrecio);
 
 module.exports = router;

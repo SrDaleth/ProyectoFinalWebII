@@ -108,13 +108,25 @@ async function cargarDisfraces() {
   disfraces.forEach(item => {
     const isAvailable = item.stockDisponible > 0;
     grid.innerHTML += `
-      <div class="card">
+      <div class="card" style="position: relative;">
+        <!-- Botón de Descuento (Esquina superior izquierda) -->
+        <button class="btn" onclick="abrirModalPrecio('${item._id}', ${item.precioAlquiler})" 
+          style="position: absolute; top: 10px; left: 10px; background: rgba(108,92,231,0.8); color: white; padding: 5px 10px; border-radius: 6px; font-size: 0.8rem; z-index: 10;">
+          🏷️ Descuento
+        </button>
+
+        <!-- Botón de Eliminar (Esquina superior derecha) -->
+        <button class="btn" onclick="abrirModalEliminar('${item._id}')" 
+          style="position: absolute; top: 10px; right: 10px; background: rgba(255,118,117,0.8); color: white; padding: 5px 10px; border-radius: 50%; z-index: 10;">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+
         <img src="${item.imagenUrl}" class="card-img" alt="${item.nombre}">
         <div class="card-body">
           <div>
             <div class="card-title">${item.nombre}</div>
             <div class="card-info">Categoría: ${item.categoria} | Talla: ${item.talla}</div>
-            <div class="card-info"><strong>Precio:</strong> $${item.precioAlquiler.toLocaleString()}</div>
+            <div class="card-info"><strong>Precio:</strong> $${item.precioAlquiler.toLocaleString('es-CO')}</div>
             <span class="stock-badge ${isAvailable ? 'available' : 'empty'}">
               Stock: ${item.stockDisponible} / ${item.stockTotal}
             </span>
@@ -149,15 +161,25 @@ async function cargarAlquileres() {
   tbody.innerHTML = '';
 
   alquileres.forEach(a => {
-    const fechaFormat = new Date(a.fechaDevolucionProgramada).toLocaleDateString('es-CO');
+    const fAlquiler = formatearFechaLocal(a.fechaAlquiler || a.createdAt);
+    const fDevolucion = formatearFechaLocal(a.fechaDevolucionProgramada);
+    const isActivo = a.estado === 'ACTIVO';
+
     tbody.innerHTML += `
       <tr>
         <td><strong>${a.cedulaCliente}</strong></td>
         <td>${a.nombreCliente}</td>
-        <td>${a.telefonoCliente}</td>
         <td>${a.disfrazId ? a.disfrazId.nombre : 'N/A'}</td>
-        <td>${fechaFormat}</td>
-        <td><span class="stock-badge available">${a.estado}</span></td>
+        <td>${fAlquiler}</td>
+        <td>${fDevolucion}</td>
+        <td><span class="stock-badge ${isActivo ? 'empty' : 'available'}">${a.estado}</span></td>
+        <td>
+          ${isActivo ? `
+            <button class="btn btn-success" style="font-size: 0.8rem; padding: 4px 8px;" onclick="devolverDisfraz('${a._id}')">
+              ↩️ Devolver
+            </button>
+          ` : '—'}
+        </td>
       </tr>
     `;
   });
@@ -198,4 +220,126 @@ function cancelarAgregarDisfraz() {
   if (form) form.reset();
   quitarImagenCargada();
   closeModal('modal-nuevo-disfraz');
+}
+
+// 1. Solución de Fecha de Devolución exacta (evita mostrar el día anterior por zona horaria UTC)
+function formatearFechaLocal(fechaIso) {
+  if (!fechaIso) return 'N/A';
+  const dateObj = new Date(fechaIso);
+  // Usar getUTCDate() / getUTCMonth() si se guardó como ISO String YYYY-MM-DD
+  const userTimezoneOffset = dateObj.getTimezoneOffset() * 60000;
+  const fechaAjustada = new Date(dateObj.getTime() + userTimezoneOffset);
+  return fechaAjustada.toLocaleDateString('es-CO', { year: 'numeric', month: '2-digit', day: '2-digit' });
+}
+
+async function devolverDisfraz(alquilerId) {
+  const pin = prompt('Ingresa el PIN de seguridad para confirmar la devolución:');
+  if (!pin) return;
+
+  const res = await fetch(`${API_URL}/alquileres/${alquilerId}/devolver`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pin })
+  });
+
+  const data = await res.json();
+  if (res.ok) {
+    alert('Disfraz devuelto con éxito');
+    cargarAlquileres();
+  } else {
+    alert(`Error: ${data.error}`);
+  }
+}
+
+// 4. Cambiar Precio / Descuento
+function abrirModalPrecio(disfrazId, precioActual) {
+  document.getElementById('precio-disfraz-id').value = disfrazId;
+  document.getElementById('nuevo-precio-val').value = precioActual;
+  openModal('modal-cambiar-precio');
+}
+
+document.getElementById('form-cambiar-precio').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = document.getElementById('precio-disfraz-id').value;
+  const precioAlquiler = document.getElementById('nuevo-precio-val').value;
+  const pin = document.getElementById('precio-pin').value;
+
+  const res = await fetch(`${API_URL}/disfraces/${id}/precio`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ precioAlquiler, pin })
+  });
+
+  if (res.ok) {
+    closeModal('modal-cambiar-precio');
+    cargarDisfraces();
+  } else {
+    const data = await res.json();
+    alert(`Error: ${data.error}`);
+  }
+});
+
+
+// 5. Vaciar Inventario Completo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+document.getElementById('form-vaciar-todo').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const pin = document.getElementById('vaciar-pin').value;
+
+  const res = await fetch(`${API_URL}/disfraces/vaciar/todo`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pin })
+  });
+
+  if (res.ok) {
+    alert('Inventario y alquileres eliminados por completo.');
+    closeModal('modal-vaciar-todo');
+    cargarDisfraces();
+  } else {
+    const data = await res.json();
+    alert(`Error: ${data.error}`);
+  }
+});
+
+// 6. Cargar Métricas Diarias
+async function cargarMetricas() {
+  const res = await fetch(`${API_URL}/alquileres`);
+  const alquileres = await res.json();
+
+  const hoyStr = new Date().toISOString().split('T')[0];
+  let totalHoy = 0;
+  let acumuladoTotal = 0;
+
+  alquileres.forEach(a => {
+    const precio = a.disfrazId ? a.disfrazId.precioAlquiler : 0;
+    acumuladoTotal += precio;
+
+    const fechaAlqStr = new Date(a.fechaAlquiler || a.createdAt).toISOString().split('T')[0];
+    if (fechaAlqStr === hoyStr) {
+      totalHoy += precio;
+    }
+  });
+
+  document.getElementById('ingresos-hoy').textContent = `$${totalHoy.toLocaleString('es-CO')}`;
+  document.getElementById('ingresos-totales').textContent = `$${acumuladoTotal.toLocaleString('es-CO')}`;
+}
+
+// 7. Navegación entre Pestañas
+function switchSection(section) {
+  document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-menu a').forEach(a => a.classList.remove('active'));
+
+  if (section === 'catalogo') {
+    document.getElementById('sec-catalogo').classList.add('active');
+    document.getElementById('section-title').textContent = 'Catálogo de Disfraces';
+    cargarDisfraces();
+  } else if (section === 'alquileres') {
+    document.getElementById('sec-alquileres').classList.add('active');
+    document.getElementById('section-title').textContent = 'Historial de Alquileres';
+    cargarAlquileres();
+  } else if (section === 'metricas') {
+    document.getElementById('sec-metricas').classList.add('active');
+    document.getElementById('section-title').textContent = 'Métricas y Conteo Diario';
+    cargarMetricas();
+  }
 }
