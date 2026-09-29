@@ -100,3 +100,42 @@ body { background-color: var(--bg-dark); color: var(--text-light); }
   .sidebar.active { transform: translateX(260px); }
   .cards-grid { grid-template-columns: 1fr; }
 }
+
+
+/* Estilos para la barra de búsqueda responsive */
+.filter-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.filter-container input {
+  flex: 1;
+  min-width: 0; /* Previene desbordamientos de flexbox en móviles */
+}
+
+/* En pantallas móviles la barra se apila verticalmente */
+@media (max-width: 600px) {
+  .filter-container {
+    flex-direction: column;
+  }
+  
+  .filter-container button {
+    width: 100%;
+  }
+}
+
+/* Scroll horizontal suave para la tabla en móviles */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 8px;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px; /* Asegura que la tabla conserve una anchura legible */
+}

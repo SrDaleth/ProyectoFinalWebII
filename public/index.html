@@ -49,28 +49,34 @@
       </section>
 
       <!-- VISTA 2: HISTORIAL DE ALQUILERES -->
-      <section id="sec-alquileres" class="content-section">
-        <div class="filter-box" style="margin-bottom: 20px;">
-          <input type="text" id="search-cedula" placeholder="Filtrar por Cédula de cliente...">
-          <button class="btn btn-primary" onclick="cargarAlquileres()"><i class="fa-solid fa-search"></i> Buscar</button>
-        </div>
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Cédula</th>
-              <th>Cliente</th>
-              <th>Disfraz</th>
-              <th>Fecha Alquiler</th>
-              <th>Fecha Devolución</th>
-              <th>Estado</th>
-              <th>Acción</th>
-            </tr>
-          </thead>
-          <tbody id="alquileres-table-body">
-            <!-- Dinámico desde JS -->
-          </tbody>
-        </table>
-      </section>
+      <!-- Pestaña Historial de Alquileres -->
+<section id="sec-alquileres" class="content-section">
+  <!-- Contenedor del buscador responsive -->
+  <div class="filter-container">
+    <input type="text" id="search-cedula" placeholder="Filtrar por Cédula de cliente...">
+    <button class="btn btn-primary" onclick="cargarAlquileres()">
+      <i class="fa-solid fa-search"></i> Buscar
+    </button>
+  </div>
+
+  <!-- Contenedor con scroll para evitar desbordamientos en móvil -->
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Cédula</th>
+          <th>Cliente</th>
+          <th>Disfraz</th>
+          <th>Fecha Alquiler</th>
+          <th>Fecha Devolución</th>
+          <th>Estado</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody id="alquileres-table-body"></tbody>
+    </table>
+  </div>
+</section>
 
       <!-- VISTA 3: MÉTRICAS POR DÍAS -->
       <section id="sec-metricas" class="content-section">
