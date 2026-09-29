@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mystika - Control de Alquiler de Disfraces</title>
+  <link rel="stylesheet" href="./css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Botón Móvil -->
+  <button id="toggle-sidebar" class="mobile-toggle"><i class="fa-solid fa-bars"></i></button>
+
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar">
+      <div class="brand">
+        <h2>✨ Mystika</h2>
+      </div>
+      <nav class="nav-menu">
+        <a href="#" class="active" onclick="switchSection('catalogo')"><i class="fa-solid fa-mask"></i> Catálogo</a>
+        <a href="#" onclick="switchSection('alquileres')"><i class="fa-solid fa-receipt"></i> Historial Alquileres</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="top-header">
+        <h1 id="section-title">Catálogo de Disfraces</h1>
+        <button class="btn btn-primary" onclick="openModal('modal-nuevo-disfraz')">+ Agregar Disfraz</button>
+      </header>
+
+      <!-- SECCIÓN CATÁLOGO (Cards 3 Columnas) -->
+      <section id="sec-catalogo" class="content-section active">
+        <div id="costumes-grid" class="cards-grid">
+          <!-- Dinámico desde JS -->
+        </div>
+      </section>
+
+      <!-- SECCIÓN HISTORIAL ALQUILERES -->
+      <section id="sec-alquileres" class="content-section">
+        <div class="filter-box">
+          <input type="text" id="search-cedula" placeholder="Filtrar por Cédula de cliente...">
+          <button class="btn btn-secondary" onclick="cargarAlquileres()"><i class="fa-solid fa-search"></i> Buscar</button>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Cédula</th>
+              <th>Cliente</th>
+              <th>Teléfono</th>
+              <th>Disfraz</th>
+              <th>Fecha Devolución</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="alquileres-table-body">
+            <!-- Dinámico -->
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL: NUEVO DISFRAZ -->
+  <div id="modal-nuevo-disfraz" class="modal">
+    <div class="modal-content">
+      <h3>Agregar Nuevo Disfraz</h3>
+      <form id="form-nuevo-disfraz" enctype="multipart/form-data">
+        <input type="text" name="nombre" placeholder="Nombre del Disfraz" required>
+        <input type="text" name="categoria" placeholder="Categoría (Ej: Terror, Época)" required>
+        <input type="text" name="talla" placeholder="Talla (S, M, L, XL)" required>
+        <input type="number" name="precioAlquiler" placeholder="Precio Alquiler ($)" required>
+        <input type="number" name="stockTotal" placeholder="Stock / Cantidad Inicial" required>
+        <!-- Input de archivo -->
+        <label class="file-input-label">
+          📷 Subir Foto (Móvil / PC)
+          <input type="file" id="input-imagen-disfraz" name="imagen" accept="image/*" capture="environment" required>
+        </label>
+
+        <!-- Previsualización y botón para eliminar la imagen -->
+      <div id="container-preview-imagen" style="display: none; margin: 10px 0; text-align: center;">
+        <img id="preview-imagen" src="" alt="Vista previa" style="max-width: 100%; max-height: 150px; border-radius: 8px; object-fit: cover;">
+        <br>
+        <button type="button" class="btn btn-cancel" style="margin-top: 8px; font-size: 0.85rem; padding: 5px 10px;" onclick="quitarImagenCargada()">
+          🗑️ Quitar imagen
+        </button>
+      </div>
+
+      <div class="modal-actions">
+        <!-- El botón cancelar ahora limpia el formulario antes de cerrar -->
+        <button type="button" class="btn btn-cancel" onclick="cancelarAgregarDisfraz()">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+      </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: REGISTRAR ALQUILER -->
+  <div id="modal-alquilar" class="modal">
+    <div class="modal-content">
+      <h3>Registrar Alquiler de Disfraz</h3>
+      <form id="form-alquilar">
+        <input type="hidden" id="alquiler-disfraz-id">
+        <input type="text" id="alq-cedula" placeholder="Cédula del Cliente" required>
+        <input type="text" id="alq-nombre" placeholder="Nombre Completo del Cliente" required>
+        <input type="text" id="alq-telefono" placeholder="Teléfono de Contacto" required>
+        <label>Fecha Límite de Devolución:</label>
+        <input type="date" id="alq-fecha-dev" required>
+        
+        <div class="pin-box">
+          <label><i class="fa-solid fa-lock"></i> PIN de Seguridad para Confirmar:</label>
+          <input type="password" id="alq-pin" maxlength="8" placeholder="••••" required>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-cancel" onclick="closeModal('modal-alquilar')">Cancelar</button>
+          <button type="submit" class="btn btn-success">Confirmar y Descontar Stock</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="./js/app.js"></script>
+</body>
+</html>
