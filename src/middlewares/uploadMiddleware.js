@@ -1,4 +1,4 @@
-const multer = require('multer');
+/*const multer = require('multer');
 const sharp = require('sharp');
 const path = require('path');
 const fs = require('fs');
@@ -39,6 +39,36 @@ const processImage = async (req, res, next) => {
   } catch (error) {
     res.status(500).json({ error: 'Error al procesar la imagen' });
   }
+};
+
+module.exports = { uploadSingle: upload.single('imagen'), processImage };*/
+
+const multer = require('multer');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'mystika_disfraces',
+    allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
+    transformation: [{ width: 600, height: 600, crop: 'fill', gravity: 'auto' }]
+  }
+});
+
+const upload = multer({ storage: storage });
+
+const processImage = (req, res, next) => {
+  if (req.file && req.file.path) {
+    req.body.imagenUrl = req.file.path;
+  }
+  next();
 };
 
 module.exports = { uploadSingle: upload.single('imagen'), processImage };

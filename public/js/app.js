@@ -96,6 +96,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+
+//funcion para cargar Disfraces
 async function cargarDisfraces() {
   const res = await fetch(`${API_URL}/disfraces`);
   const disfraces = await res.json();
